@@ -6,11 +6,11 @@
 - For every car registration plate stored in the system, fetch and display as much information as possible from the DVLA API.
 - At a minimum, show the make, model, year, and an image of the vehicle.
 - Ensure the UI:
--- Displays all saved cars.
--- Allows users to add new cars, delete saved cars, and view more details for each one.
--- Handles and displays errors gracefully if the DVLA API integration fails.
--- Is styled neatly.
--- (Bonus) Is mobile-friendly/responsive.
+- - Displays all saved cars.
+- - Allows users to add new cars, delete saved cars, and view more details for each one.
+- - Handles and displays errors gracefully if the DVLA API integration fails.
+- - Is styled neatly.
+- - (Bonus) Is mobile-friendly/responsive.
 
 ## Constraints:
 - Only valid and verified registration plates should be stored in the saved list.
