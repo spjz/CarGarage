@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import VehicleEnquiryService from '../services/dvla';
 
 function CarDetails() {
     const { registrationnumber } = useParams();
     const [carDetails, setCarDetails] = useState(null);
     const [error, setError] = useState(null);
 
-    const fetchCarDetails = () => {
-        if (!registrationNumber) {
+    const fetchCarDetails = async () => {
+        if (!registrationnumber) {
             setError('Invalid registration number');
             return;
         }
@@ -17,17 +18,18 @@ function CarDetails() {
             { registrationNumber: 'XYZ789', make: 'Honda', model: 'Civic', year: 2019, color: 'Red' },
         ];
 
-        const car = mockData.find((item) => item.registrationNumber === registrationNumber.toLowerCase());
+        // const realData = await VehicleEnquiryService.getRegistrationDetails(registrationnumber);
+        const car = mockData.find((item) => item.registrationNumber === registrationnumber.toLowerCase());
 
-        if (car) {
-            setError(`Car with registration number ${registrationNumber} not found`);
+        if (!car) {
+            setError(`Car with registration number ${registrationnumber} not found`);
             return;
         }
-        car = {
+
+        setCarDetails({
             ...car,
             year: car.year,
-        }
-        setCarDetails(car);
+        });
         setError(null);
     };
 
@@ -36,7 +38,7 @@ function CarDetails() {
     }
 
     if (error) {
-        return <p className="text-red-500">{error.msg}</p>;
+        return <p className="text-red-500">{error}</p>;
     }
 
     if (!carDetails) {
