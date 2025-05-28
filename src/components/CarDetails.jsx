@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import VehicleEnquiryService from '../services/dvla';
-import { ArrowUturnLeftIcon } from '@heroicons/react/24/solid';
+import { ArrowUturnLeftIcon, ArrowPathIcon } from '@heroicons/react/24/solid';
 
 const CACHE_PREFIX = 'vehicle_details_';
 
@@ -10,45 +10,51 @@ function CarDetails() {
     const [ carDetails, setCarDetails ] = useState(null);
     const [ error, setError ] = useState(null);
     const [ loading, setLoading]  = useState(true);
+    const [ isRefreshing, setIsRefreshing ] = useState(false);
 
-    useEffect(() => {
-        const fetchCarDetails = async () => {
-            if (!registrationnumber) {
-                setError('Please provide a registration number');
+    const fetchCarDetails = async (forceRefresh = false) => {
+        if (!registrationnumber) {
+            setError('Please provide a registration number');
+            setLoading(false);
+            return;
+        }
+
+        try {
+            if (forceRefresh) {
+                setIsRefreshing(true);
+            } else {
+                setLoading(true);
+            }
+            
+            // Check cache first, unless forcing refresh
+            const cacheKey = `${CACHE_PREFIX}${registrationnumber}`;
+            const cachedData = !forceRefresh ? localStorage.getItem(cacheKey) : null;
+            
+            if (cachedData) {
+                setCarDetails(JSON.parse(cachedData));
+                setError(null);
                 setLoading(false);
                 return;
             }
 
-            try {
-                setLoading(true);
-                
-                // Check cache first
-                const cacheKey = `${CACHE_PREFIX}${registrationnumber}`;
-                const cachedData = localStorage.getItem(cacheKey);
-                
-                if (cachedData) {
-                    setCarDetails(JSON.parse(cachedData));
-                    setError(null);
-                    setLoading(false);
-                    return;
-                }
+            // Fetch from API
+            const car = await VehicleEnquiryService.getRegistrationDetails(registrationnumber);
+            
+            // Store in cache
+            localStorage.setItem(cacheKey, JSON.stringify(car));
+            
+            setCarDetails(car);
+            setError(null);
+        } catch (error) {
+            setError(error.message);
+            setCarDetails(null);
+        } finally {
+            setLoading(false);
+            setIsRefreshing(false);
+        }
+    };
 
-                // If not in cache, fetch from API
-                const car = await VehicleEnquiryService.getRegistrationDetails(registrationnumber);
-                
-                // Store in cache
-                localStorage.setItem(cacheKey, JSON.stringify(car));
-                
-                setCarDetails(car);
-                setError(null);
-            } catch (error) {
-                setError(error.message);
-                setCarDetails(null);
-            } finally {
-                setLoading(false);
-            }
-        };
-
+    useEffect(() => {
         fetchCarDetails();
     }, [registrationnumber]);
 
@@ -111,6 +117,14 @@ function CarDetails() {
                     <ArrowUturnLeftIcon className="size-6 text-white-500" />
                     <span>Return to Garage</span>
                 </Link>
+                <button
+                    onClick={() => fetchCarDetails(true)}
+                    disabled={isRefreshing}
+                    className="inline-flex items-center gap-1 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-green-300 disabled:cursor-not-allowed"
+                >
+                    <ArrowPathIcon className={`size-6 text-white-500 ${isRefreshing ? 'animate-spin' : ''}`} />
+                    <span>{isRefreshing ? 'Updating...' : 'Update Details'}</span>
+                </button>
             </div>
             <h2 className="mb-4 text-2xl font-semibold">Vehicle Details</h2>
             <div className="bg-white shadow overflow-hidden sm:rounded-lg">
