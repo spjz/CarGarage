@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import VehicleEnquiryService from '../services/dvla';
-import { ArrowUturnLeftIcon, ArrowPathIcon } from '@heroicons/react/24/solid';
+import { ArrowUturnLeftIcon, ArrowPathIcon, BackspaceIcon } from '@heroicons/react/24/solid';
 
 const CACHE_PREFIX = 'vehicle_details_';
 const IMAGE_PREFIX = 'vehicle_image_';
@@ -149,6 +149,18 @@ function CarDetails() {
                 >
                     <ArrowPathIcon className={`size-6 text-white-500 ${isRefreshing ? 'animate-spin' : ''}`} />
                     <span>{isRefreshing ? 'Updating...' : 'Update Details'}</span>
+                </button>
+                <button
+                    onClick={() => {
+                        const savedVehicles = JSON.parse(localStorage.getItem('garage_vehicles') || '[]');
+                        const updatedVehicles = savedVehicles.filter(v => v.registrationNumber !== registrationnumber);
+                        localStorage.setItem('garage_vehicles', JSON.stringify(updatedVehicles));
+                        window.location.href = '/';
+                    }}
+                    className="inline-flex items-center gap-1 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                >
+                    <BackspaceIcon className="size-6 text-white-500" />
+                    <span>Remove from Garage</span>
                 </button>
             </div>
             <h2 className="mb-4 text-2xl font-semibold">Vehicle Details</h2>

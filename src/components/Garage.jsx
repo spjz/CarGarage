@@ -169,10 +169,11 @@ function Garage() {
                     />
                     <button
                         type="submit"
-                        className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300 disabled:cursor-not-allowed"
+                        className="px-4 py-2 flex items-center gap-1 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300 disabled:cursor-not-allowed"
                         disabled={isLoading}
                     >
-                        {isLoading ? 'Validating...' : 'Add Vehicle'}
+                        <PlusIcon className="size-6 text-white-500" />
+                        <span className="">{isLoading ? 'Validating...' : 'Add Vehicle'}</span>
                     </button>
                 </div>
                 {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
@@ -202,14 +203,14 @@ function Garage() {
                                 className="text-red-500 flex items-center gap-1 hover:underline"
                             >
                                 <BackspaceIcon className="size-6 text-red-500" />
-                                Remove
+                                <span className="">Remove</span>
                             </button>
                             <button
                                 onClick={() => handleSelectVehicle(vehicle.id)}
                                 className="text-blue-500 flex items-center gap-1 hover:underline"
                             >
                                 <DocumentCheckIcon className="size-6 text-blue-500" />
-                                Select
+                                <span className="">Select</span>
                             </button>
                             <Link
                                 to={`/car/${vehicle.registrationNumber}`}
