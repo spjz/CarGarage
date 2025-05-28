@@ -19,7 +19,7 @@ function CarDetails() {
         ];
 
         // const realData = await VehicleEnquiryService.getRegistrationDetails(registrationnumber);
-        const car = mockData.find((item) => item.registrationNumber === registrationnumber.toLowerCase());
+        const car = mockData.find((item) => item.registrationNumber.toLocaleLowerCase() === registrationnumber.toLowerCase());
 
         if (!car) {
             setError(`Car with registration number ${registrationnumber} not found`);
