@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import VehicleEnquiryService from '../services/dvla';
 
 function Garage() {
     const [vehicles, setVehicles] = useState([
@@ -11,9 +12,11 @@ function Garage() {
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const [error, setError] = useState(null);
     const [newRegistration, setNewRegistration] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setError(null);
         
         // Validate registration number
         if (!newRegistration.trim()) {
@@ -27,15 +30,29 @@ function Garage() {
             return;
         }
 
-        // Add new vehicle
-        const newVehicle = {
-            id: Math.max(...vehicles.map(v => v.id)) + 1,
-            registrationNumber: newRegistration.trim()
-        };
+        setIsLoading(true);
+        try {
+            // Validate registration with DVLA service
+            const vehicleDetails = await VehicleEnquiryService.getRegistrationDetails(newRegistration.trim());
+            
+            // Add new vehicle with additional details
+            const newVehicle = {
+                id: Math.max(...vehicles.map(v => v.id)) + 1,
+                registrationNumber: newRegistration.trim(),
+                make: vehicleDetails.make,
+                model: vehicleDetails.model,
+                colour: vehicleDetails.colour,
+                fuelType: vehicleDetails.fuelType,
+                yearOfManufacture: vehicleDetails.yearOfManufacture
+            };
 
-        setVehicles([...vehicles, newVehicle]);
-        setNewRegistration('');
-        setError(null);
+            setVehicles([...vehicles, newVehicle]);
+            setNewRegistration('');
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const removeVehicle = (id) => {
@@ -73,12 +90,14 @@ function Garage() {
                         onChange={(e) => setNewRegistration(e.target.value)}
                         placeholder="Enter registration number"
                         className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        disabled={isLoading}
                     />
                     <button
                         type="submit"
-                        className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300 disabled:cursor-not-allowed"
+                        disabled={isLoading}
                     >
-                        Add Vehicle
+                        {isLoading ? 'Validating...' : 'Add Vehicle'}
                     </button>
                 </div>
                 {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
@@ -87,25 +106,34 @@ function Garage() {
             <ul className="space-y-2">
                 {vehicles.map((vehicle, index) => (
                     <li key={vehicle.id} className="flex justify-between p-2 bg-gray-100 rounded-md">
-                        <span>{vehicle.registrationNumber}</span>
-                        <button
-                            onClick={() => removeVehicle(vehicle.id)}
-                            className="text-red-500 hover:underline"
-                        >
-                            Remove
-                        </button>
-                        <button
-                            onClick={() => handleSelectVehicle(vehicle.id)}
-                            className="text-blue-500 hover:underline"
-                        >
-                            Select
-                        </button>
-                        <Link
-                            to={`/car/${vehicle.registrationNumber}`}
-                            className="text-green-500 hover:underline"
-                        >
-                            View Details
-                        </Link>
+                        <div>
+                            <span className="font-medium">{vehicle.registrationNumber}</span>
+                            {vehicle.make && (
+                                <span className="ml-2 text-gray-600">
+                                    {vehicle.make} {vehicle.model} ({vehicle.colour})
+                                </span>
+                            )}
+                        </div>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => removeVehicle(vehicle.id)}
+                                className="text-red-500 hover:underline"
+                            >
+                                Remove
+                            </button>
+                            <button
+                                onClick={() => handleSelectVehicle(vehicle.id)}
+                                className="text-blue-500 hover:underline"
+                            >
+                                Select
+                            </button>
+                            <Link
+                                to={`/car/${vehicle.registrationNumber}`}
+                                className="text-green-500 hover:underline"
+                            >
+                                View Details
+                            </Link>
+                        </div>
                     </li>
                 ))}
             </ul>
