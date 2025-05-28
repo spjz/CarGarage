@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import VehicleEnquiryService from '../services/dvla';
+import { ArrowUturnLeftIcon } from '@heroicons/react/24/solid';
 
 function CarDetails() {
     const { registrationnumber } = useParams();
-    const [carDetails, setCarDetails] = useState(null);
-    const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [ carDetails, setCarDetails ] = useState(null);
+    const [ error, setError ] = useState(null);
+    const [ loading, setLoading]  = useState(true);
 
     useEffect(() => {
         const fetchCarDetails = async () => {
@@ -83,6 +84,15 @@ function CarDetails() {
 
     return (
         <div className="p-6">
+            <div className="mb-4 flex gap-2">
+                <Link 
+                    to="/" 
+                    className="inline-flex items-center gap-1 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                    <ArrowUturnLeftIcon className="size-6 text-white-500" />
+                    <span>Return to Garage</span>
+                </Link>
+            </div>
             <h2 className="mb-4 text-2xl font-semibold">Vehicle Details</h2>
             <div className="bg-white shadow overflow-hidden sm:rounded-lg">
                 <div className="px-4 py-5 sm:px-6">

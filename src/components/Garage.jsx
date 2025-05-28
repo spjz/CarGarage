@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import VehicleEnquiryService from '../services/dvla';
+import { BackspaceIcon, DocumentCheckIcon, PlusIcon, ListBulletIcon } from '@heroicons/react/24/solid'
+
 
 const STORAGE_KEY = 'garage_vehicles';
 
@@ -181,21 +183,24 @@ function Garage() {
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => removeVehicle(vehicle.id)}
-                                className="text-red-500 hover:underline"
+                                className="text-red-500 flex items-center gap-1 hover:underline"
                             >
+                                <BackspaceIcon className="size-6 text-red-500" />
                                 Remove
                             </button>
                             <button
                                 onClick={() => handleSelectVehicle(vehicle.id)}
-                                className="text-blue-500 hover:underline"
+                                className="text-blue-500 flex items-center gap-1 hover:underline"
                             >
+                                <DocumentCheckIcon className="size-6 text-blue-500" />
                                 Select
                             </button>
                             <Link
                                 to={`/car/${vehicle.registrationNumber}`}
-                                className="text-green-500 hover:underline"
+                                className="text-green-500 flex items-center gap-1 hover:underline"
                             >
-                                View Details
+                                <ListBulletIcon className="size-6 text-black-500" />
+                                <span className="">View Details</span>
                             </Link>
                         </div>
                     </li>
