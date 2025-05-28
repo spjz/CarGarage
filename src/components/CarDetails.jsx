@@ -13,13 +13,13 @@ function CarDetails() {
             return;
         }
 
-        const mockData = [
-            { registrationNumber: 'ABC123', make: 'Toyota', model: 'Corolla', year: 2020, color: 'Blue' },
-            { registrationNumber: 'XYZ789', make: 'Honda', model: 'Civic', year: 2019, color: 'Red' },
-        ];
+        // const mockData = [
+        //     { registrationNumber: 'ABC123', make: 'Toyota', model: 'Corolla', year: 2020, color: 'Blue' },
+        //     { registrationNumber: 'XYZ789', make: 'Honda', model: 'Civic', year: 2019, color: 'Red' },
+        // ];
 
-        // const realData = await VehicleEnquiryService.getRegistrationDetails(registrationnumber);
-        const car = mockData.find((item) => item.registrationNumber.toLocaleLowerCase() === registrationnumber.toLowerCase());
+        const car = await VehicleEnquiryService.getRegistrationDetails(registrationnumber);
+        // const car = mockData.find((item) => item.registrationNumber.toLocaleLowerCase() === registrationnumber.toLowerCase());
 
         if (!car) {
             setError(`Car with registration number ${registrationnumber} not found`);
