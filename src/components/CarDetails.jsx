@@ -3,6 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import VehicleEnquiryService from '../services/dvla';
 import { ArrowUturnLeftIcon } from '@heroicons/react/24/solid';
 
+const CACHE_PREFIX = 'vehicle_details_';
+
 function CarDetails() {
     const { registrationnumber } = useParams();
     const [ carDetails, setCarDetails ] = useState(null);
@@ -19,7 +21,24 @@ function CarDetails() {
 
             try {
                 setLoading(true);
+                
+                // Check cache first
+                const cacheKey = `${CACHE_PREFIX}${registrationnumber}`;
+                const cachedData = localStorage.getItem(cacheKey);
+                
+                if (cachedData) {
+                    setCarDetails(JSON.parse(cachedData));
+                    setError(null);
+                    setLoading(false);
+                    return;
+                }
+
+                // If not in cache, fetch from API
                 const car = await VehicleEnquiryService.getRegistrationDetails(registrationnumber);
+                
+                // Store in cache
+                localStorage.setItem(cacheKey, JSON.stringify(car));
+                
                 setCarDetails(car);
                 setError(null);
             } catch (error) {

@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import VehicleEnquiryService from '../services/dvla';
 import { BackspaceIcon, DocumentCheckIcon, PlusIcon, ListBulletIcon } from '@heroicons/react/24/solid'
 
-
 const STORAGE_KEY = 'garage_vehicles';
+const VALIDATION_FLAG_KEY = 'garage_vehicles_validated';
 
 function Garage() {
     const [vehicles, setVehicles] = useState(() => {
@@ -21,7 +21,7 @@ function Garage() {
     const [error, setError] = useState(null);
     const [newRegistration, setNewRegistration] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [isValidating, setIsValidating] = useState(true);
+    const [isValidating, setIsValidating] = useState(false);
 
     // Save vehicles to localStorage whenever they change
     useEffect(() => {
@@ -29,7 +29,11 @@ function Garage() {
     }, [vehicles]);
 
     useEffect(() => {
-        validateAllVehicles();
+        const hasValidated = localStorage.getItem(VALIDATION_FLAG_KEY);
+        if (!hasValidated) {
+            validateAllVehicles();
+            localStorage.setItem(VALIDATION_FLAG_KEY, 'true');
+        }
     }, []);
 
     const validateAllVehicles = async () => {
