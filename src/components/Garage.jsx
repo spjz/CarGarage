@@ -2,19 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import VehicleEnquiryService from '../services/dvla';
 
+const STORAGE_KEY = 'garage_vehicles';
+
 function Garage() {
-    const [vehicles, setVehicles] = useState([
-        { id: 1, registrationNumber: 'ABC123' },
-        { id: 2, registrationNumber: 'XYZ789' },
-        { id: 3, registrationNumber: 'LMN456' },
-        { id: 4, registrationNumber: 'DEF012' },
-        { id: 5, registrationNumber: 'SW03PER' },
-    ]);
+    const [vehicles, setVehicles] = useState(() => {
+        const savedVehicles = localStorage.getItem(STORAGE_KEY);
+        return savedVehicles ? JSON.parse(savedVehicles) : [
+            { id: 1, registrationNumber: 'ABC123' },
+            { id: 2, registrationNumber: 'XYZ789' },
+            { id: 3, registrationNumber: 'LMN456' },
+            { id: 4, registrationNumber: 'DEF012' },
+            { id: 5, registrationNumber: 'SW03PER' },
+        ];
+    });
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const [error, setError] = useState(null);
     const [newRegistration, setNewRegistration] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState(true);
+
+    // Save vehicles to localStorage whenever they change
+    useEffect(() => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(vehicles));
+    }, [vehicles]);
 
     useEffect(() => {
         validateAllVehicles();
