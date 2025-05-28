@@ -4,6 +4,7 @@ import VehicleEnquiryService from '../services/dvla';
 import { ArrowUturnLeftIcon, ArrowPathIcon } from '@heroicons/react/24/solid';
 
 const CACHE_PREFIX = 'vehicle_details_';
+const IMAGE_PREFIX = 'vehicle_image_';
 
 function CarDetails() {
     const { registrationnumber } = useParams();
@@ -11,6 +12,30 @@ function CarDetails() {
     const [ error, setError ] = useState(null);
     const [ loading, setLoading]  = useState(true);
     const [ isRefreshing, setIsRefreshing ] = useState(false);
+    const [ carImage, setCarImage ] = useState(null);
+
+    // Load saved image on component mount
+    useEffect(() => {
+        if (registrationnumber) {
+            const savedImage = localStorage.getItem(`${IMAGE_PREFIX}${registrationnumber}`);
+            if (savedImage) {
+                setCarImage(savedImage);
+            }
+        }
+    }, [registrationnumber]);
+
+    const handleImageUpload = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const imageData = reader.result;
+                setCarImage(imageData);
+                localStorage.setItem(`${IMAGE_PREFIX}${registrationnumber}`, imageData);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     const fetchCarDetails = async (forceRefresh = false) => {
         if (!registrationnumber) {
@@ -132,6 +157,51 @@ function CarDetails() {
                     <h3 className="text-lg leading-6 font-medium text-gray-900">
                         Registration: {carDetails.registrationNumber}
                     </h3>
+                    <div className="mt-4">
+                        <div className="flex flex-col items-center">
+                            {carImage ? (
+                                <div className="relative">
+                                    <img 
+                                        src={carImage} 
+                                        alt={`${carDetails.registrationNumber}`}
+                                        className="max-w-md rounded-lg shadow-lg"
+                                    />
+                                    <div className="absolute top-2 right-2 flex gap-2">
+                                        <button
+                                            onClick={() => {
+                                                setCarImage(null);
+                                                localStorage.removeItem(`${IMAGE_PREFIX}${registrationnumber}`);
+                                            }}
+                                            className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
+                                            title="Remove image"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                                    <label className="cursor-pointer">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleImageUpload}
+                                            className="hidden"
+                                        />
+                                        <div className="text-gray-500">
+                                            <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                            </svg>
+                                            <p className="mt-1">Click to upload vehicle image</p>
+                                            <p className="text-xs text-gray-400">PNG, JPG, GIF up to 10MB</p>
+                                        </div>
+                                    </label>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
                 <div className="border-t border-gray-200">
                     <dl>

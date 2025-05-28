@@ -5,6 +5,7 @@ import { BackspaceIcon, DocumentCheckIcon, PlusIcon, ListBulletIcon } from '@her
 
 const STORAGE_KEY = 'garage_vehicles';
 const VALIDATION_FLAG_KEY = 'garage_vehicles_validated';
+const IMAGE_PREFIX = 'vehicle_image_';
 
 function Garage() {
     const [vehicles, setVehicles] = useState(() => {
@@ -22,6 +23,7 @@ function Garage() {
     const [newRegistration, setNewRegistration] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState(false);
+    const [selectedVehicleImage, setSelectedVehicleImage] = useState(null);
 
     // Save vehicles to localStorage whenever they change
     useEffect(() => {
@@ -35,6 +37,16 @@ function Garage() {
             localStorage.setItem(VALIDATION_FLAG_KEY, 'true');
         }
     }, []);
+
+    // Load selected vehicle image when selection changes
+    useEffect(() => {
+        if (selectedVehicle) {
+            const savedImage = localStorage.getItem(`${IMAGE_PREFIX}${selectedVehicle.registrationNumber}`);
+            setSelectedVehicleImage(savedImage);
+        } else {
+            setSelectedVehicleImage(null);
+        }
+    }, [selectedVehicle]);
 
     const validateAllVehicles = async () => {
         setIsValidating(true);
@@ -212,8 +224,43 @@ function Garage() {
             </ul>
             {selectedVehicle && (
                 <div className="mt-4 p-4 bg-gray-200 rounded-md">
-                    <h3 className="text-xl font-semibold">Selected Vehicle</h3>
-                    <p>Registration Number: {selectedVehicle.registrationNumber}</p>
+                    <h3 className="text-xl font-semibold mb-4">Selected Vehicle</h3>
+                    <div className="flex flex-col md:flex-row gap-6">
+                        <div className="flex-1">
+                            <p className="mb-2"><span className="font-medium">Registration Number:</span> {selectedVehicle.registrationNumber}</p>
+                            {selectedVehicle.make && (
+                                <p className="mb-2"><span className="font-medium">Make:</span> {selectedVehicle.make}</p>
+                            )}
+                            {selectedVehicle.model && (
+                                <p className="mb-2"><span className="font-medium">Model:</span> {selectedVehicle.model}</p>
+                            )}
+                            {selectedVehicle.colour && (
+                                <p className="mb-2"><span className="font-medium">Colour:</span> {selectedVehicle.colour}</p>
+                            )}
+                            {selectedVehicle.fuelType && (
+                                <p className="mb-2"><span className="font-medium">Fuel Type:</span> {selectedVehicle.fuelType}</p>
+                            )}
+                            {selectedVehicle.yearOfManufacture && (
+                                <p className="mb-2"><span className="font-medium">Year:</span> {selectedVehicle.yearOfManufacture}</p>
+                            )}
+                        </div>
+                        <div className="flex-1">
+                            {selectedVehicleImage ? (
+                                <div className="relative">
+                                    <img 
+                                        src={selectedVehicleImage} 
+                                        alt={`${selectedVehicle.registrationNumber}`}
+                                        className="w-full max-w-md rounded-lg shadow-lg"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center bg-white">
+                                    <p className="text-gray-500">No image available</p>
+                                    <p className="text-sm text-gray-400 mt-1">Upload an image in the vehicle details page</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
