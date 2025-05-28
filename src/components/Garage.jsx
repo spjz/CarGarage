@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import VehicleEnquiryService from '../services/dvla';
 
@@ -8,11 +8,54 @@ function Garage() {
         { id: 2, registrationNumber: 'XYZ789' },
         { id: 3, registrationNumber: 'LMN456' },
         { id: 4, registrationNumber: 'DEF012' },
+        { id: 5, registrationNumber: 'SW03PER' },
     ]);
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const [error, setError] = useState(null);
     const [newRegistration, setNewRegistration] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isValidating, setIsValidating] = useState(true);
+
+    useEffect(() => {
+        validateAllVehicles();
+    }, []);
+
+    const validateAllVehicles = async () => {
+        setIsValidating(true);
+        setError(null);
+        
+        try {
+            const updatedVehicles = await Promise.all(
+                vehicles.map(async (vehicle) => {
+                    try {
+                        const details = await VehicleEnquiryService.getRegistrationDetails(vehicle.registrationNumber);
+                        return {
+                            ...vehicle,
+                            make: details.make,
+                            model: details.model,
+                            colour: details.colour,
+                            fuelType: details.fuelType,
+                            yearOfManufacture: details.yearOfManufacture,
+                            validationStatus: 'valid'
+                        };
+                    } catch (error) {
+                        console.error(`Failed to validate vehicle ${vehicle.registrationNumber}:`, error);
+                        return {
+                            ...vehicle,
+                            validationStatus: 'invalid',
+                            validationError: error.message
+                        };
+                    }
+                })
+            );
+            
+            setVehicles(updatedVehicles);
+        } catch (error) {
+            setError('Failed to validate some vehicles. Please try again later.');
+        } finally {
+            setIsValidating(false);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -81,6 +124,10 @@ function Garage() {
         <div className="p-6">
             <h2 className="mb-4 text-2xl font-semibold">Your Garage</h2>
             
+            {isValidating && (
+                <p className="mb-4 text-blue-500">Validating vehicles...</p>
+            )}
+            
             {/* Add Vehicle Form */}
             <form onSubmit={handleSubmit} className="mb-6">
                 <div className="flex gap-2">
@@ -105,7 +152,9 @@ function Garage() {
 
             <ul className="space-y-2">
                 {vehicles.map((vehicle, index) => (
-                    <li key={vehicle.id} className="flex justify-between p-2 bg-gray-100 rounded-md">
+                    <li key={vehicle.id} className={`flex justify-between p-2 rounded-md ${
+                        vehicle.validationStatus === 'invalid' ? 'bg-red-50' : 'bg-gray-100'
+                    }`}>
                         <div>
                             <span className="font-medium">{vehicle.registrationNumber}</span>
                             {vehicle.make && (
@@ -113,8 +162,13 @@ function Garage() {
                                     {vehicle.make} {vehicle.model} ({vehicle.colour})
                                 </span>
                             )}
+                            {vehicle.validationStatus === 'invalid' && (
+                                <div className="mt-1 text-sm text-red-500">
+                                    {vehicle.validationError || 'Failed to validate vehicle'}
+                                </div>
+                            )}
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex items-center gap-2">
                             <button
                                 onClick={() => removeVehicle(vehicle.id)}
                                 className="text-red-500 hover:underline"
