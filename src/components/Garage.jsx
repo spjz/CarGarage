@@ -181,10 +181,10 @@ function Garage() {
 
             <ul className="space-y-2">
                 {vehicles.map((vehicle, index) => (
-                    <li key={vehicle.id} className={`flex justify-between p-2 rounded-md ${
+                    <li key={vehicle.id} className={`flex flex-col sm:flex-row sm:justify-between p-2 rounded-md ${
                         vehicle.validationStatus === 'invalid' ? 'bg-red-50' : 'bg-gray-100'
                     }`}>
-                        <div>
+                        <div className="mb-2 sm:mb-0">
                             <span className="font-medium">{vehicle.registrationNumber}</span>
                             {vehicle.make && (
                                 <span className="ml-2 text-gray-600">
@@ -197,7 +197,7 @@ function Garage() {
                                 </div>
                             )}
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                             <button
                                 onClick={() => removeVehicle(vehicle.id)}
                                 className="text-red-500 flex items-center gap-1 hover:underline"
